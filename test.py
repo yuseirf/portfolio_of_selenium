@@ -1,6 +1,8 @@
-import csv
 from selenium import webdriver
 from selenium.webdriver import Chrome
+
+import csv
+import time
 import pdb
 
 replace_table = str.maketrans({
@@ -19,12 +21,18 @@ item_labels = [
 ]
 
 driver = webdriver.Chrome('/usr/local/bin/chromedriver')
-driver.get('https://jobadvance.jp/category/%e5%85%a8%e5%9b%bd/')
+start_url = 'https://jobadvance.jp/category/%e5%85%a8%e5%9b%bd/'
+driver.get(start_url)
 
-for job in driver.find_elements_by_css_selector('ol#post_list2 li.article'):
-    a_article = job.find_element_by_css_selector('a')
-    a_article.click()
+article_urls = []
+jobs = driver.find_elements_by_css_selector('ol#post_list2 li.article')
+for job in jobs:
+    article_url = job.find_element_by_css_selector('a').get_attribute('href')
+    article_urls.append(article_url)
+    time.sleep(3)
 
+for article_url_list in article_urls:
+    driver.get(article_url_list)
     item = {}
     table_tr_selectors = driver.find_elements_by_css_selector('table.wp-block-table > tbody > tr')
     for table_tr_selector in table_tr_selectors:
@@ -58,12 +66,13 @@ for job in driver.find_elements_by_css_selector('ol#post_list2 li.article'):
         if mail_address_text_content is not None and "メールで応募する：" in mail_address_text_content:
             item['mail_address'] = mail_address_a_content
             mail_address = item['mail_address']
+    print(item)
     # 取得したitemをcsvファイルに書き込み
     with open('job_article.csv', 'w', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=item_labels)
         writer.writeheader()
         writer.writerow(item)
-
     driver.back()
+
 
 driver.close()
