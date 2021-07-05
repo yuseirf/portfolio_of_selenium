@@ -97,7 +97,7 @@ def main():
                     if "電話で応募する：" in phone_number_text_content:
                         phone_number = phone_number_a_content
                         item['phone_number'] = phone_number
-                if len(contact_selector.find_elements_by_css_selector('p:nth-of-type(3)')) > 0:
+                if len(contact_selector.find_elements_by_css_selector('p:nth-of-type(3) a')) > 0:
                     mail_address_text_content = contact_selector.find_element_by_css_selector('p:nth-of-type(3)').text
                     mail_address_a_content = contact_selector.find_element_by_css_selector('p:nth-of-type(3) a').text
                     if "メールで応募する：" in mail_address_text_content:
