@@ -5,8 +5,7 @@ import csv
 import time
 import re
 
-# 完成したら削除
-import pdb
+# 取得したデータの参照のため
 import json
 
 
@@ -33,6 +32,10 @@ driver = webdriver.Chrome('/usr/local/bin/chromedriver')
 page_urls = []
 start_url = 'https://jobadvance.jp/category/%e5%85%a8%e5%9b%bd/'
 page_urls.append(start_url)
+
+with open('job_article.csv', 'w', encoding='utf-8') as f:
+    writer = csv.DictWriter(f, fieldnames=item_labels)
+    writer.writeheader()
 
 for page_url in page_urls:
     driver.get(page_url)
@@ -81,25 +84,24 @@ for page_url in page_urls:
         for contact_selector in contact_selectors:
             if len(contact_selector.find_elements_by_css_selector('p:nth-of-type(2)')) > 0:
                 phone_number_text_content = contact_selector.find_element_by_css_selector('p:nth-of-type(2)').text
-                phone_number_a_content = contact_selector.find_element_by_css_selector('p > a').text
+                phone_number_a_content = contact_selector.find_element_by_css_selector('p a').text
                 if "電話で応募する：" in phone_number_text_content:
                     phone_number = phone_number_a_content
                     item['phone_number'] = phone_number
             if len(contact_selector.find_elements_by_css_selector('p:nth-of-type(3)')) > 0:
                 mail_address_text_content = contact_selector.find_element_by_css_selector('p:nth-of-type(3)').text
-                mail_address_a_content = contact_selector.find_element_by_css_selector('p:nth-of-type(3) > a').text
+                mail_address_a_content = contact_selector.find_element_by_css_selector('p:nth-of-type(3) a').text
                 if "メールで応募する：" in mail_address_text_content:
                     mail_address = mail_address_a_content
                     item['mail_address'] = mail_address
-        # 完成したら削除
+
+        # 取得したデータの参照　不要の場合かコメントアウトして下さい。
         item_elem = json.dumps(item, ensure_ascii=False)
         print(item_elem.replace(',', ',\n'))
 
-        driver.back()
-
-        with open('job_article.csv', 'w', newline='', encoding='utf-8') as f:
+        with open('job_article.csv', 'a', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=item_labels)
-            writer.writeheader()
             writer.writerow(item)
+        driver.back()
 
 driver.close()
